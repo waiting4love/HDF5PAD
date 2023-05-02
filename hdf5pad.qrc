@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>res/up.svg</file>
+    <file alias="app">res/app_icon.ico</file>
+    <file>res/open.png</file>
+    <file>res/go.svg</file>
+  </qresource>
+</RCC>
