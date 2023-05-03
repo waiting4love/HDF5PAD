@@ -30,5 +30,6 @@
 #include <QtWidgets/QWidget>
 #include <QStack> 
 #include <QClipboard> 
+#include <QDebug> 
 
 #endif

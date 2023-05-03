@@ -8,10 +8,10 @@ public:
     :HighFive::Object(id){}
 };
 
-class MyTableRefItem : public QTableWidgetItem
+class MyTableRefItem : public QStandardItem
 {
 public:
-    using QTableWidgetItem::QTableWidgetItem;
+    using QStandardItem::QStandardItem;
     std::string path;
     HighFive::ObjectType type;
 };

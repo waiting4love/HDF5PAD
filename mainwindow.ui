@@ -103,7 +103,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QTableWidget" name="tableData"/>
+          <widget class="QTableView" name="tableView"/>
          </item>
          <item>
           <widget class="QComboBox" name="cbxDataPages"/>

@@ -107,8 +107,10 @@ void MainWindow::on_actionForward_triggered()
 
 void MainWindow::on_actionCopy_triggered()
 {
-    int row = ui->tableData->rowCount();
-    int col = ui->tableData->columnCount();
+    auto tableData = dynamic_cast<QStandardItemModel*>(ui->tableView->model());
+    if(!tableData) return;
+    int row = tableData->rowCount();
+    int col = tableData->columnCount();
 
     QStringList lines;
     for(int r=0; r<row; r++)
@@ -116,7 +118,7 @@ void MainWindow::on_actionCopy_triggered()
         QStringList items;
         for(int c=0; c<col; c++)
         {
-            items.append( ui->tableData->item(r, c)->text() );
+            items.append( tableData->item(r, c)->text() );
         }
         lines.append(items.join('\t'));
     }
@@ -161,16 +163,15 @@ void MainWindow::on_tree_itemSelectionChanged()
 void MainWindow::clearItemViewer()
 {
     ui->tableAttr->clearContents();
-    ui->tableData->clear();
-    ui->tableData->setColumnCount(0);
-    ui->tableData->setRowCount(0);
+    ui->tableView->setModel(nullptr);
+    tableModel.reset();
     ui->labelData->setText("");
     ui->cbxDataPages->clear();
     curr_dataset.reset();
     pagerPtr.reset();
 }
 
-QTableWidgetItem* MainWindow::createTableItem(const void* data, HighFive::DataTypeClass class_type, size_t size, HighFive::CompoundType* compType)
+QStandardItem* MainWindow::createTableItem(const void* data, HighFive::DataTypeClass class_type, size_t size, HighFive::CompoundType* compType)
 {   
     QString str;
     switch(class_type)
@@ -218,14 +219,16 @@ QTableWidgetItem* MainWindow::createTableItem(const void* data, HighFive::DataTy
         str = getDisplayString(data, class_type, size);
         break;
     }
-    return new QTableWidgetItem(str);
+    return new QStandardItem(str);
 }
 
 void MainWindow::updateUI()
 {
     ui->actionBack->setEnabled(!back_paths.empty());
     ui->actionForward->setEnabled(!forward_paths.empty());
-    ui->actionCopy->setEnabled(ui->tableData->rowCount() * ui->tableData->columnCount() > 0);
+
+    auto tableData = dynamic_cast<QStandardItemModel*>(ui->tableView->model());
+    ui->actionCopy->setEnabled( tableData && tableData->rowCount() * tableData->columnCount() > 0);
 }
 
 QString MainWindow::getShortString(const HighFive::DataSet& dataset)
@@ -272,7 +275,7 @@ QString MainWindow::getShortString(const HighFive::DataSet& dataset)
         QStringList sl;
         for (size_t i = 0; i < eleCount; i++)
         {
-            std::unique_ptr<QTableWidgetItem> s(createTableItem(&buff[i * size], class_type, size, compType.get()));
+            std::unique_ptr<QStandardItem> s(createTableItem(&buff[i * size], class_type, size, compType.get()));
             sl.append(s->text());
         }
         return "["+sl.join(', ')+"]";
@@ -282,7 +285,7 @@ QString MainWindow::getShortString(const HighFive::DataSet& dataset)
         if(size == 0) return {};
         std::vector<uint8_t> buff(stsize);
         dataset.read(buff.data(), data_type);
-        std::unique_ptr<QTableWidgetItem> s(createTableItem(&buff[0], class_type, size, compType.get()));
+        std::unique_ptr<QStandardItem> s(createTableItem(&buff[0], class_type, size, compType.get()));
         return s->text();
     }
     return QString::fromStdString(dataset.getPath());
@@ -292,11 +295,11 @@ void MainWindow::showData(const HighFive::DataSet& dataset)
 {
     pagerPtr.reset();
     curr_dataset.reset();
-    auto table = ui->tableData;
+    auto table = ui->tableView;
     auto text = ui->labelData;
     auto pages = ui->cbxDataPages;
     pages->clear();
-    table->clear();
+    table->setModel(nullptr);
     text->setText("");
     auto dims = dataset.getDimensions();
     auto data_type = dataset.getDataType();
@@ -344,16 +347,16 @@ void MainWindow::showData(const HighFive::DataSet& dataset)
 void MainWindow::showPage(int idx)
 {
     if(idx < 0) return;
-    auto table = ui->tableData;
-    table->clear();
+    auto table = ui->tableView;
+    table->setModel(nullptr);
     if(!pagerPtr || !curr_dataset) return;
     auto buff = pagerPtr->getPageData(idx);
     auto row = pagerPtr->rowCount();
     auto col = pagerPtr->columnCount();
     auto size = pagerPtr->dataSize();
     auto eleCount = buff.size() / size;
-    table->setColumnCount((int)col);
-    table->setRowCount((int)row);
+
+    tableModel = std::make_unique<QStandardItemModel>();
 
     auto data_type = curr_dataset->getDataType();
     auto class_type = data_type.getClass();
@@ -363,20 +366,19 @@ void MainWindow::showPage(int idx)
         compType = std::make_unique<HighFive::CompoundType>(std::move(data_type));
     }
 
-    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    // table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    size_t eleCount2 = std::min<size_t>(eleCount, row * col);
-    for (size_t i = 0; i < eleCount2; i++)
+    for(size_t r=0; r<row; r++)
     {
-        auto r = i / col;
-        auto c = i % col;
-        auto s = createTableItem(&buff[i * size], class_type, size, compType.get());
-        table->setItem((int)r, (int)c, s);
+        QList<QStandardItem*> rowItems;
+        for(size_t c=0; c<col; c++)
+        {
+            size_t idx = r*col+c;
+            auto s = createTableItem(&buff[idx * size], class_type, size, compType.get());
+            rowItems.append(s);
+        }
+        tableModel->appendRow(rowItems);
     }
 
-    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    // table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    table->setModel(tableModel.get());
     updateUI();
 }
 
@@ -404,9 +406,12 @@ void MainWindow::showItemViewer(const QString& path)
     }
 }
 
-void MainWindow::on_tableData_cellDoubleClicked(int row, int column)
+void MainWindow::on_tableView_cellDoubleClicked(int row, int column)
 {
-    auto item = ui->tableData->item(row, column);
+    auto tableData = dynamic_cast<QStandardItemModel*>(ui->tableView->model());
+    if(!tableData) return;
+
+    auto item = tableData->item(row, column);
     auto myitem = dynamic_cast<MyTableRefItem*>(item);
     if(myitem)
     {

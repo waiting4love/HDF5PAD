@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStandardItemModel> 
 #include "pager.h"
 
 namespace Ui {
@@ -26,7 +27,7 @@ public slots:
     void on_btnUp_clicked();
     void on_tree_itemDoubleClicked(QTreeWidgetItem *item, int column);
     void on_tree_itemSelectionChanged();
-    void on_tableData_cellDoubleClicked(int row, int column);
+    void on_tableView_cellDoubleClicked(int row, int column);
     void showPage(int idx);
 
 private:
@@ -38,6 +39,7 @@ private:
 
     std::unique_ptr<HighFive::DataSet> curr_dataset;
     std::unique_ptr<Pager> pagerPtr;
+    std::unique_ptr<QStandardItemModel> tableModel;
 
 private:
     // back: root_path入forward_paths, back_paths出栈, 更新按钮状态
@@ -50,7 +52,7 @@ private:
     void showItemViewer(const QString& path);
     void showData( const HighFive::DataSet& dataset);
     QString getShortString(const HighFive::DataSet& dataset);
-    QTableWidgetItem* createTableItem(const void* data, HighFive::DataTypeClass class_type, size_t size, HighFive::CompoundType* compType=nullptr);
+    QStandardItem* createTableItem(const void* data, HighFive::DataTypeClass class_type, size_t size, HighFive::CompoundType* compType=nullptr);
     void updateUI();
 };
 
