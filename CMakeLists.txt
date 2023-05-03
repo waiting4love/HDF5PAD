@@ -4,33 +4,25 @@ project(HDF5Pad VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-SET(CMAKE_PREFIX_PATH D:\\Qt\\Qt5.6.0\\5.6\\msvc2015_64)
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
-SET(CMAKE_AUTOMOC ON)
-SET(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 
-SET(MAIN_SRCS main.cpp mainwindow.cpp)
-find_package(Qt5 COMPONENTS Widgets Core)
+find_package(Qt5 COMPONENTS REQUIRED Widgets Core)
+find_package(hdf5 CONFIG REQUIRED)
+find_package(HighFive CONFIG REQUIRED)
 
+set(MAIN_SRCS main.cpp mainwindow.cpp pager.cpp)
+set(APP_ICON "res/app.rc")
 set(QRC_SOURCE_FILES hdf5pad.qrc)
+
 qt5_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 set_property(SOURCE ${QRC_FILES} PROPERTY SKIP_AUTOGEN ON)
 
-add_compile_options(-utf-8)
-set(APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app.rc")
-ADD_EXECUTABLE(${PROJECT_NAME} WIN32 ${MAIN_SRCS} ${QRC_FILES} ${APP_ICON})
-target_include_directories(
-    ${PROJECT_NAME} PRIVATE
-    3rdparty/hdf5/include
-    3rdparty/HighFive/include
-)
-target_link_directories(
-    ${PROJECT_NAME} PRIVATE
-    3rdparty/hdf5/bin
-)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} Qt5::Widgets hdf5)
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+add_executable(${PROJECT_NAME} WIN32 ${MAIN_SRCS} ${QRC_FILES} ${APP_ICON})
+
 target_precompile_headers(${PROJECT_NAME} PRIVATE prefix.h)
-target_compile_definitions(${PROJECT_NAME} PRIVATE H5_BUILT_AS_DYNAMIC_LIB)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets hdf5::hdf5-shared HighFive)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

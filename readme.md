@@ -1,17 +1,16 @@
 # HDF5 PAD
-MATLAB的MAT(v7)文件使用HDF5来存放，所以写了一个工具研究研究MAT按什么结构存放到HDF5中的。顺便学习一下HDF5的用法，感谢[HighFive](https://github.com/BlueBrain/HighFive)项目，让我少走了很多弯路。
+MATLAB的MAT(v7.3)文件使用HDF5来存放，所以写了一个工具研究研究MAT按什么结构存放到HDF5中的。顺便学习一下HDF5的用法，感谢[HighFive](https://github.com/BlueBrain/HighFive)项目，让我少走了很多弯路。
 
 ## 编译：
 
 准备这些东西
 
 1. CMake
-2. QT
-3. [HDF5](https://github.com/HDFGroup/hdf5)
-4. clone本项目后执行`git submodule update --init`会自动下载HighFive
+2. QT5.6 (我现在编译的版本，其它版本别太离谱的话问题应该不大)
+3. VCPKG
 
-编译HDF5，得到DLL和LIB，把这些文件放到`3rdparty/hdf5/bin`中，并把HDF5的所有头文件放到`3rdparty/hdf5/include`中（注意别忘了`H5pubconf.h`这个文件）
+用VCPKG安装HDF5和HighFive，下面的命令行是安装x64版本的:
+`vcpkg install hdf5:x64-windows`
+`vcpkg install highfive:x64-windows`
 
-注：用vcpkg来管理第三方库应该是个更好的主意，有时间简化一下
-
-可以用CMAKE编译了。
+CMAKE编译时加入参数 `"-DCMAKE_TOOLCHAIN_FILE=D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"`，请修改你的路径。如果用VSCODE的话，在`.vscode/settings.json`里可以配置。

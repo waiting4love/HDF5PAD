@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "pager.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,34 +19,39 @@ public:
     // ui中使用了QMetaObject::connectSlotsByName(MainWindow)，直接按规则命令就会自动连接
 public slots:
     void on_actionOpen_triggered();
+    void on_actionBack_triggered();
+    void on_actionForward_triggered();
+    void on_actionCopy_triggered();
     void on_btnGo_clicked();
     void on_btnUp_clicked();
     void on_tree_itemDoubleClicked(QTreeWidgetItem *item, int column);
     void on_tree_itemSelectionChanged();
     void on_tableData_cellDoubleClicked(int row, int column);
+    void showPage(int idx);
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<HighFive::File> file_ptr;
     QString root_path;
+    QStack<QString> back_paths;
+    QStack<QString> forward_paths;
+
+    std::unique_ptr<HighFive::DataSet> curr_dataset;
+    std::unique_ptr<Pager> pagerPtr;
 
 private:
-    void gotoPath(const QString& path);
+    // back: root_path入forward_paths, back_paths出栈, 更新按钮状态
+    // go: root_path入back_paths，forward_path清空, 更新按钮状态
+    // forward: root_path入back_paths, forward_path出栈, 更新按钮状态
+    enum class GotoMode { Init, Normal, Back, Forward };
+    void gotoPath(const QString& path, GotoMode mode);
     void initTree();
     void clearItemViewer();
     void showItemViewer(const QString& path);
-    void handlePath(const QString& path,
-        std::function<void(const HighFive::File&)> hf,
-        std::function<void(const HighFive::DataSet&)> hd,
-        std::function<void(const HighFive::Group&)> hg,
-        std::function<void()> hn
-        );
     void showData( const HighFive::DataSet& dataset);
-    void showStringData(const std::vector<uint8_t>& data, size_t valueSize, const std::vector<hsize_t>& dims);
-    void showDoubleData(const std::vector<uint8_t>& data, size_t valueSize, const std::vector<hsize_t>& dims);
-    void showIntData(const std::vector<uint8_t>& data, size_t valueSize, const std::vector<hsize_t>& dims);
-    void showRefData(const std::vector<uint8_t>& data, size_t valueSize, const std::vector<hsize_t>& dims);
-    QString getMatlabString(const std::vector<uint8_t>& data, size_t valueSize);
-    QString getMatlabString(const HighFive::DataSet& dataset);
+    QString getShortString(const HighFive::DataSet& dataset);
+    QTableWidgetItem* createTableItem(const void* data, HighFive::DataTypeClass class_type, size_t size, HighFive::CompoundType* compType=nullptr);
+    void updateUI();
 };
 
 #endif // MAINWINDOW_H

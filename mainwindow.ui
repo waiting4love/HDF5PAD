@@ -110,7 +110,14 @@
          </item>
         </layout>
        </widget>
-       <widget class="QTableWidget" name="tableAttr"/>
+       <widget class="QTableWidget" name="tableAttr">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -130,6 +137,11 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
+   <addaction name="separator"/>
+   <addaction name="actionBack"/>
+   <addaction name="actionForward"/>
+   <addaction name="separator"/>
+   <addaction name="actionCopy"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -155,6 +167,42 @@
     <string>Close</string>
    </property>
   </action>
+  <action name="actionBack">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="hdf5pad.qrc">
+     <normaloff>:/icons/res/left-arrow.svg</normaloff>:/icons/res/left-arrow.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </action>
+  <action name="actionForward">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="hdf5pad.qrc">
+     <normaloff>:/icons/res/right-arrow.svg</normaloff>:/icons/res/right-arrow.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Forward</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="hdf5pad.qrc">
+     <normaloff>:/icons/res/copy.svg</normaloff>:/icons/res/copy.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
@@ -165,5 +213,22 @@
  <resources>
   <include location="hdf5pad.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>edtPath</sender>
+   <signal>returnPressed()</signal>
+   <receiver>btnGo</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>527</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
