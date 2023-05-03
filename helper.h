@@ -79,53 +79,62 @@ QString datasetTypeStr(const HighFive::DataSet& ds)
 
     auto dims = ds.getDimensions();
     QStringList sl;
-    std::transform(dims.begin(), dims.end(), std::back_inserter(sl), [](auto v){return QString::number(v);});
+    std::transform(dims.rbegin(), dims.rend(), std::back_inserter(sl), [](auto v){return QString::number(v);});
     return QString::fromStdString( HighFive::type_class_string(data_type.getClass()) ) + ": " + sl.join(L'×');
 }
 
-
-void appendGroupMember(QTreeWidgetItem* parent, const HighFive::Group& group)
+template<class Derivate>
+QList<QTreeWidgetItem *> appendGroupMember(QTreeWidgetItem* parent, const HighFive::NodeTraits<Derivate>& group)
 {
+    QList<QTreeWidgetItem *> items;
+    if(parent) parent->setIcon(0, QIcon(":/icons/group"));
     auto names = group.listObjectNames();
     for(const auto& name : names)
     {
         auto type = group.getObjectType(name);
         auto type_str = typeToStr(type);
+        QString iconPath;
         if(type == HighFive::ObjectType::Dataset)
         {
             type_str = type_str + "(" + datasetTypeStr(group.getDataSet(name)) + ")";
+            iconPath = ":/icons/cells";
         }
         auto item = new QTreeWidgetItem(parent, QStringList{QString::fromStdString(name), type_str});
         if(type == HighFive::ObjectType::Group) // add sub items
         {
             appendGroupMember(item, group.getGroup(name));
         }
+        if(!iconPath.isEmpty())
+            item->setIcon(0, QIcon(iconPath));
+        items.append(item);
     }
+    return items;
 }
 
 template <typename Derivate>
 void setTreeContent(QTreeWidget* treeWidget, const HighFive::NodeTraits<Derivate>& node)
 {
-    auto names = node.listObjectNames();
-    QList<QTreeWidgetItem *> items;
-    for(const auto& name : names)
-    {
-        auto type = node.getObjectType(name);
-        auto type_str = typeToStr(type);
-        if(type == HighFive::ObjectType::Dataset)
-        {
-            type_str = type_str + "(" + datasetTypeStr(node.getDataSet(name)) + ")";
-        }
+    // auto names = node.listObjectNames();
+    // QList<QTreeWidgetItem *> items;
+    // for(const auto& name : names)
+    // {
+    //     auto type = node.getObjectType(name);
+    //     auto type_str = typeToStr(type);
+    //     if(type == HighFive::ObjectType::Dataset)
+    //     {
+    //         type_str = type_str + "(" + datasetTypeStr(node.getDataSet(name)) + ")";
+    //     }
 
-        auto item = new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr), QStringList{QString::fromStdString(name), type_str});
+    //     auto item = new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr), QStringList{QString::fromStdString(name), type_str});
 
-        if(type == HighFive::ObjectType::Group) // add sub items
-        {
-            appendGroupMember(item, node.getGroup(name));
-        }
+    //     if(type == HighFive::ObjectType::Group) // add sub items
+    //     {
+    //         appendGroupMember(item, node.getGroup(name));
+    //     }
 
-        items.append(item);
-    }
+    //     items.append(item);
+    // }
+    auto items = appendGroupMember(nullptr, node);
     treeWidget->clear();
     treeWidget->insertTopLevelItems(0, items);
 }

@@ -146,9 +146,9 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
-     <normalon>:/icons/res/open.png</normalon>
-    </iconset>
+    <iconset resource="hdf5pad.qrc">
+     <normaloff>:/icons/res/open.svg</normaloff>
+     <normalon>:/icons/res/open.png</normalon>:/icons/res/open.svg</iconset>
    </property>
    <property name="text">
     <string>Open</string>

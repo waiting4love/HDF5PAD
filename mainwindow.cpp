@@ -311,13 +311,15 @@ void MainWindow::showData(const HighFive::DataSet& dataset)
 
     curr_dataset = std::make_unique<HighFive::DataSet>(dataset);
     pagerPtr = std::make_unique<Pager>(std::move(buff), dims, size);
-    for (size_t i = 0, c = pagerPtr->pageCount(); i < c; i++)
+    for (size_t i = 0, c = std::min<>(pagerPtr->pageCount(), 100ull); i < c; i++)
     {
         auto hidim = pagerPtr->getHiDimByPage(i);
         QStringList sl;
-        std::transform(hidim.begin(), hidim.end(), std::back_inserter(sl), [](auto d)
-                       { return QString::number(d + 1); });
-        ui->cbxDataPages->addItem(sl.join('-'), i);
+        std::transform(
+            hidim.rbegin(), hidim.rend(), std::back_inserter(sl),
+            [](auto d){ return QString::number(d + 1); });
+        QString pageName = "[:,:,"+sl.join(',')+"]";
+        ui->cbxDataPages->addItem(pageName, i);
     }
 
     if(class_type == HighFive::DataTypeClass::Compound)
@@ -361,6 +363,9 @@ void MainWindow::showPage(int idx)
         compType = std::make_unique<HighFive::CompoundType>(std::move(data_type));
     }
 
+    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    // table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
     size_t eleCount2 = std::min<size_t>(eleCount, row * col);
     for (size_t i = 0; i < eleCount2; i++)
     {
@@ -370,6 +375,8 @@ void MainWindow::showPage(int idx)
         table->setItem((int)r, (int)c, s);
     }
 
+    // table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    // table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     updateUI();
 }
 

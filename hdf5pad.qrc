@@ -1,11 +1,13 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="cells">res/cells.svg</file>
+    <file alias="group">res/group.svg</file>
     <file>res/copy.svg</file>
     <file>res/left-arrow.svg</file>
     <file>res/right-arrow.svg</file>
     <file>res/up.svg</file>
     <file alias="app">res/app_icon.ico</file>
-    <file>res/open.png</file>
     <file>res/go.svg</file>
+    <file>res/open.svg</file>
   </qresource>
 </RCC>
