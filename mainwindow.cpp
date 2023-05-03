@@ -191,7 +191,7 @@ QStandardItem* MainWindow::createTableItem(const void* data, HighFive::DataTypeC
                 }
                 else
                 {
-                    auto grp = reinterpret_cast<const HighFive::DataSet&>(obj);
+                    auto& grp = reinterpret_cast<const HighFive::Group&>(obj);
                     item->path = grp.getPath();
                     str = QString::fromStdString(item->path);
                 } 
@@ -406,12 +406,12 @@ void MainWindow::showItemViewer(const QString& path)
     }
 }
 
-void MainWindow::on_tableView_cellDoubleClicked(int row, int column)
+void MainWindow::on_tableView_doubleClicked(const QModelIndex &index)
 {
     auto tableData = dynamic_cast<QStandardItemModel*>(ui->tableView->model());
     if(!tableData) return;
 
-    auto item = tableData->item(row, column);
+    auto item = tableData->item(index.row(), index.column());
     auto myitem = dynamic_cast<MyTableRefItem*>(item);
     if(myitem)
     {

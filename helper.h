@@ -114,26 +114,6 @@ QList<QTreeWidgetItem *> appendGroupMember(QTreeWidgetItem* parent, const HighFi
 template <typename Derivate>
 void setTreeContent(QTreeWidget* treeWidget, const HighFive::NodeTraits<Derivate>& node)
 {
-    // auto names = node.listObjectNames();
-    // QList<QTreeWidgetItem *> items;
-    // for(const auto& name : names)
-    // {
-    //     auto type = node.getObjectType(name);
-    //     auto type_str = typeToStr(type);
-    //     if(type == HighFive::ObjectType::Dataset)
-    //     {
-    //         type_str = type_str + "(" + datasetTypeStr(node.getDataSet(name)) + ")";
-    //     }
-
-    //     auto item = new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr), QStringList{QString::fromStdString(name), type_str});
-
-    //     if(type == HighFive::ObjectType::Group) // add sub items
-    //     {
-    //         appendGroupMember(item, node.getGroup(name));
-    //     }
-
-    //     items.append(item);
-    // }
     auto items = appendGroupMember(nullptr, node);
     treeWidget->clear();
     treeWidget->insertTopLevelItems(0, items);

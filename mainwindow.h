@@ -27,7 +27,7 @@ public slots:
     void on_btnUp_clicked();
     void on_tree_itemDoubleClicked(QTreeWidgetItem *item, int column);
     void on_tree_itemSelectionChanged();
-    void on_tableView_cellDoubleClicked(int row, int column);
+    void on_tableView_doubleClicked(const QModelIndex &index);
     void showPage(int idx);
 
 private:
