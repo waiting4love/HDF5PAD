@@ -135,7 +135,8 @@ void showAttrib(QTableWidget* table, const HighFive::AnnotateTraits<Derivate>& o
         auto data_type = attr.getDataType();
         auto class_type= data_type.getClass();
         auto size = data_type.getSize();
-        auto eleCount = attr.getMemSpace().getElementCount();
+        auto space = attr.getMemSpace();
+        auto eleCount = space.getElementCount();
 
         table->setItem(row, 1,  new QTableWidgetItem(QString::fromStdString(HighFive::type_class_string(class_type))));
         
@@ -146,9 +147,11 @@ void showAttrib(QTableWidget* table, const HighFive::AnnotateTraits<Derivate>& o
             QString val;            
             if(class_type == HighFive::DataTypeClass::VarLen)
             {
+                hvl_t *fieldnames_vl = (hvl_t*)buff.data();
                 QStringList sl;
-                std::transform(buff.begin(), buff.end(), std::back_inserter(sl), [](char c){ return QString::asprintf("%02X", (uint8_t)c); });
-                val = sl.join(' ');
+                std::transform(fieldnames_vl, fieldnames_vl + eleCount, std::back_inserter(sl), [](const hvl_t& vl){ return QString::fromLatin1((const char*)vl.p, (int)vl.len); } );
+                val = sl.join(',');
+                H5Treclaim(data_type.getId(), space.getId(), H5P_DEFAULT, fieldnames_vl);
             }
             else
             {
