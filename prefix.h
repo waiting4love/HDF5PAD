@@ -31,5 +31,7 @@
 #include <QStack> 
 #include <QClipboard> 
 #include <QDebug> 
+#include <QDropEvent> 
+#include <QMimeData> 
 
 #endif

@@ -10,6 +10,9 @@
     <height>480</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string notr="true">HDF5 PAD</string>
   </property>

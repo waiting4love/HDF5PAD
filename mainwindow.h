@@ -29,7 +29,8 @@ public slots:
     void on_tree_itemSelectionChanged();
     void on_tableView_doubleClicked(const QModelIndex &index);
     void showPage(int idx);
-
+    void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<HighFive::File> file_ptr;

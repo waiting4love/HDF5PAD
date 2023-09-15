@@ -382,6 +382,27 @@ void MainWindow::showPage(int idx)
     updateUI();
 }
 
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    QList<QUrl> urls = event->mimeData()->urls();
+    if (urls.isEmpty()) {
+        return;
+    }
+
+    QString filePath = urls.first().toLocalFile();
+    curr_dataset.reset();
+    pagerPtr.reset();
+    file_ptr = std::make_unique<HighFive::File>(filePath.toStdString());
+    gotoPath("", GotoMode::Init);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+}
+
 void MainWindow::showItemViewer(const QString& path)
 {
     clearItemViewer();
